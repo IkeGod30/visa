@@ -91,6 +91,16 @@ export default function GuidePage() {
               <Link to={`/assist?objective=${objective.id}&country=${country.id}`} className="btn btn-gold btn-block">
                 Request assistance
               </Link>
+              {objective.id === 'study' && (
+                <Link to={`/assist?objective=study&country=${country.id}&service=admission`} className="btn btn-ghost-dark btn-block">
+                  🎓 Help me secure admission
+                </Link>
+              )}
+              {objective.id === 'work' && (
+                <Link to={`/assist?objective=work&country=${country.id}&service=job`} className="btn btn-ghost-dark btn-block">
+                  💼 Help me find a job
+                </Link>
+              )}
               <button className="btn btn-link btn-block" onClick={() => window.print()}>
                 🖨 Print this guide
               </button>

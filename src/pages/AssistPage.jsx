@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { objectives, getObjective } from '../data/objectives.js';
 import { countries } from '../data/countries.js';
@@ -15,27 +15,85 @@ const STATES = [
   'Outside Nigeria',
 ];
 
-const SERVICES = [
-  { icon: '📋', title: 'Document review', text: 'An adviser checks your documents against the requirements and flags weak points.' },
-  { icon: '🗺️', title: 'Route planning', text: 'Find the visa route that fits your goals, budget and profile.' },
-  { icon: '✍️', title: 'Letters & statements', text: 'Help writing cover letters, statements of purpose and letters of explanation.' },
-  { icon: '🎤', title: 'Interview preparation', text: 'Mock U.S. visa and credibility interviews with feedback.' },
-  { icon: '🔁', title: 'Refusal review', text: 'Understand why you were refused and plan a stronger reapplication.' },
+// `objective` pre-selects a travel purpose when the service is picked from its card.
+const SERVICE_GROUPS = [
+  {
+    title: 'Get there: admission, jobs & more',
+    services: [
+      { id: 'admission', icon: '🎓', title: 'Secure admission', objective: 'study', text: 'We shortlist suitable schools, check entry requirements and guide your application until you receive an offer (CAS, I-20, LOA, CoE).' },
+      { id: 'scholarship', icon: '🏅', title: 'Find scholarships', objective: 'study', text: 'Get matched to funding such as Chevening, Commonwealth, DAAD and Stipendium Hungaricum, with help on your essays.' },
+      { id: 'job', icon: '💼', title: 'Find a job abroad', objective: 'work', text: 'Rewrite your CV for the destination, find legitimate job boards and check that employers are licensed to sponsor you.' },
+      { id: 'credentials', icon: '📑', title: 'Credentials & tests', text: 'Help with WES/ECA, qualification recognition and preparing for IELTS, PTE or CELPIP.' },
+      { id: 'arrival', icon: '🧳', title: 'Accommodation & arrival', text: 'Find student housing or short-let accommodation, and plan your first weeks abroad.' },
+    ],
+  },
+  {
+    title: 'Visa application support',
+    services: [
+      { id: 'documents', icon: '📋', title: 'Document review', text: 'An adviser checks your documents against the requirements and flags weak points.' },
+      { id: 'route', icon: '🗺️', title: 'Route planning', text: 'Find the visa route that fits your goals, budget and profile.' },
+      { id: 'letters', icon: '✍️', title: 'Letters & statements', text: 'Help writing cover letters, statements of purpose and letters of explanation.' },
+      { id: 'interview', icon: '🎤', title: 'Interview preparation', text: 'Mock U.S. visa and credibility interviews with feedback.' },
+      { id: 'refusal', icon: '🔁', title: 'Refusal review', text: 'Understand why you were refused and plan a stronger reapplication.' },
+    ],
+  },
 ];
+const SERVICES = SERVICE_GROUPS.flatMap((g) => g.services);
+const getService = (id) => SERVICES.find((s) => s.id === id);
 
-const empty = { name: '', email: '', phone: '', state: '', objective: '', country: '', service: '', timeline: '', message: '', consent: false };
+const QUALIFICATIONS = ['WAEC / NECO', 'OND / NCE', 'HND', 'Bachelor’s degree', 'Master’s degree', 'PhD'];
+
+// Extra questions shown for specific services.
+const EXTRA_FIELDS = {
+  level: { label: 'Level of study', options: ['Foundation / Diploma', 'Undergraduate', 'Master’s', 'PhD', 'Language course'] },
+  field: { label: 'Course / field of study', placeholder: 'e.g. Nursing, Computer Science, MBA' },
+  qualification: { label: 'Highest qualification', options: QUALIFICATIONS },
+  intake: { label: 'Preferred intake', placeholder: 'e.g. September 2027' },
+  budget: { label: 'Yearly tuition budget', options: ['Under ₦10m', '₦10m–₦25m', '₦25m–₦50m', 'Over ₦50m', 'Need full scholarship'] },
+  profession: { label: 'Profession / job title', placeholder: 'e.g. Registered Nurse, Software Engineer' },
+  experience: { label: 'Years of experience', options: ['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', 'Over 10 years'] },
+};
+const SERVICE_FIELDS = {
+  admission: ['level', 'field', 'qualification', 'intake', 'budget'],
+  scholarship: ['level', 'field', 'qualification', 'intake'],
+  job: ['profession', 'experience', 'qualification'],
+};
+const REQUIRED_EXTRAS = ['level', 'field', 'profession', 'experience'];
+
+const empty = {
+  name: '', email: '', phone: '', state: '', objective: '', country: '', service: '', timeline: '', message: '', consent: false,
+  ...Object.fromEntries(Object.keys(EXTRA_FIELDS).map((k) => [k, ''])),
+};
 
 export default function AssistPage() {
   const [params] = useSearchParams();
-  const [form, setForm] = useState({ ...empty, objective: params.get('objective') || '', country: params.get('country') || '' });
+  const [form, setForm] = useState({
+    ...empty,
+    objective: params.get('objective') || '',
+    country: params.get('country') || '',
+    service: getService(params.get('service')) ? params.get('service') : '',
+  });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(null);
   const [requests, setRequests] = useState(() => load(STORAGE_KEY, []));
+  const formRef = useRef(null);
 
   const objective = getObjective(form.objective);
+  const extraFields = SERVICE_FIELDS[form.service] || [];
   const set = (field) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [field]: value, ...(field === 'objective' ? { country: '' } : {}) }));
+  };
+
+  // Picking a service card selects it in the form and suggests a matching travel purpose.
+  const chooseService = (service) => {
+    setSubmitted(null);
+    setForm((f) => ({
+      ...f,
+      service: service.id,
+      ...(service.objective && !f.objective ? { objective: service.objective, country: '' } : {}),
+    }));
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const validate = () => {
@@ -45,6 +103,9 @@ export default function AssistPage() {
     if (!/^(\+?234|0)[789][01]\d{8}$/.test(form.phone.replace(/[\s-]/g, ''))) e.phone = 'Enter a valid Nigerian number, e.g. 0803 123 4567 or +234 803 123 4567.';
     if (!form.objective) e.objective = 'Select your purpose of travel.';
     if (!form.service) e.service = 'Select the help you need.';
+    extraFields
+      .filter((k) => REQUIRED_EXTRAS.includes(k) && !form[k].trim())
+      .forEach((k) => (e[k] = `Please provide your ${EXTRA_FIELDS[k].label.toLowerCase()}.`));
     if (!form.consent) e.consent = 'Please confirm to continue.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -53,8 +114,12 @@ export default function AssistPage() {
   const submit = (e) => {
     e.preventDefault();
     if (!validate()) return;
+    // Keep only the extra answers that belong to the chosen service.
+    const extras = Object.fromEntries(extraFields.map((k) => [k, form[k]]));
+    const base = Object.fromEntries(Object.entries(form).filter(([k]) => !(k in EXTRA_FIELDS)));
     const request = {
-      ...form,
+      ...base,
+      details: extras,
       ref: `VS-${Date.now().toString(36).toUpperCase()}`,
       createdAt: new Date().toISOString(),
       status: 'Received',
@@ -70,24 +135,45 @@ export default function AssistPage() {
     <>
       <section className="page-head">
         <div className="container">
-          <h1>Get Visa Assistance</h1>
-          <p className="lead">Tell us about your plans and an adviser will contact you about the next steps.</p>
+          <h1>Get Assistance</h1>
+          <p className="lead">
+            From securing admission or a job offer to submitting your visa application, tell us what you need and an
+            adviser will contact you about the next steps.
+          </p>
         </div>
       </section>
 
       <section className="section">
         <div className="container">
-          <div className="grid services-grid">
-            {SERVICES.map((s) => (
-              <div key={s.title} className="card service">
-                <span className="objective-icon">{s.icon}</span>
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
+          {SERVICE_GROUPS.map((group) => (
+            <div key={group.title} className="service-group">
+              <h2 className="section-title">{group.title}</h2>
+              <div className="grid services-grid">
+                {group.services.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`card service ${form.service === s.id ? 'selected' : ''}`}
+                    onClick={() => chooseService(s)}
+                    aria-pressed={form.service === s.id}
+                  >
+                    <span className="objective-icon">{s.icon}</span>
+                    <h3>{s.title}</h3>
+                    <p>{s.text}</p>
+                    <span className="link-arrow">{form.service === s.id ? 'Selected ✓' : 'Request this →'}</span>
+                  </button>
+                ))}
               </div>
-            ))}
+            </div>
+          ))}
+
+          <div className="alert alert-warn">
+            <strong>How we help with admissions and jobs:</strong> we guide you to apply directly to real schools and
+            employers. We never sell admission letters, job offers, Certificates of Sponsorship or LMIAs. Decisions are
+            made only by the institution, employer or embassy.
           </div>
 
-          <div className="guide-layout">
+          <div className="guide-layout" ref={formRef}>
             <div className="guide-main">
               {submitted ? (
                 <div className="card success">
@@ -137,7 +223,11 @@ export default function AssistPage() {
                     <Field label="Help needed" error={errors.service}>
                       <select value={form.service} onChange={set('service')}>
                         <option value="">Select…</option>
-                        {SERVICES.map((s) => <option key={s.title}>{s.title}</option>)}
+                        {SERVICE_GROUPS.map((g) => (
+                          <optgroup key={g.title} label={g.title}>
+                            {g.services.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                          </optgroup>
+                        ))}
                       </select>
                     </Field>
                     <Field label="When do you plan to travel?">
@@ -151,6 +241,28 @@ export default function AssistPage() {
                       </select>
                     </Field>
                   </div>
+                  {extraFields.length > 0 && (
+                    <fieldset className="extra-fields">
+                      <legend>{getService(form.service).title}: a few more details</legend>
+                      <div className="form-grid">
+                        {extraFields.map((k) => {
+                          const def = EXTRA_FIELDS[k];
+                          return (
+                            <Field key={k} label={def.label} error={errors[k]}>
+                              {def.options ? (
+                                <select value={form[k]} onChange={set(k)}>
+                                  <option value="">Select…</option>
+                                  {def.options.map((o) => <option key={o}>{o}</option>)}
+                                </select>
+                              ) : (
+                                <input value={form[k]} onChange={set(k)} placeholder={def.placeholder} />
+                              )}
+                            </Field>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  )}
                   <Field label="Tell us about your situation">
                     <textarea rows={5} value={form.message} onChange={set('message')} placeholder="e.g. I have a UK master's offer starting January, sponsored by my parents. I was refused once in 2024…" />
                   </Field>
@@ -172,7 +284,8 @@ export default function AssistPage() {
                     {requests.map((r) => (
                       <li key={r.ref}>
                         <strong>{r.ref}</strong>
-                        <span>{getObjective(r.objective)?.title}{r.country && ` · ${countries[r.country]?.name}`}</span>
+                        <span>{getService(r.service)?.title || r.service}</span>
+                        <span className="muted">{getObjective(r.objective)?.title}{r.country && ` · ${countries[r.country]?.name || r.country}`}</span>
                         <small className="muted">{new Date(r.createdAt).toLocaleDateString('en-NG')} · {r.status}</small>
                       </li>
                     ))}
