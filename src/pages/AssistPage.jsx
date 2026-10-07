@@ -5,6 +5,7 @@ import { countries } from '../data/countries.js';
 import { destinationsFor } from '../data/guides.js';
 import { load, save } from '../utils/storage.js';
 import ScamAlert from '../components/ScamAlert.jsx';
+import { SERVICE_GROUPS, getService, EXTRA_FIELDS, SERVICE_FIELDS, REQUIRED_EXTRAS } from '../data/services.js';
 
 const STORAGE_KEY = 'vs-requests';
 
@@ -15,53 +16,9 @@ const STATES = [
   'Outside Nigeria',
 ];
 
-// `objective` pre-selects a travel purpose when the service is picked from its card.
-const SERVICE_GROUPS = [
-  {
-    title: 'Get there: admission, jobs & more',
-    services: [
-      { id: 'admission', icon: '🎓', title: 'Secure admission', objective: 'study', text: 'We shortlist suitable schools, check entry requirements and guide your application until you receive an offer (CAS, I-20, LOA, CoE).' },
-      { id: 'scholarship', icon: '🏅', title: 'Find scholarships', objective: 'study', text: 'Get matched to funding such as Chevening, Commonwealth, DAAD and Stipendium Hungaricum, with help on your essays.' },
-      { id: 'job', icon: '💼', title: 'Find a job abroad', objective: 'work', text: 'Rewrite your CV for the destination, find legitimate job boards and check that employers are licensed to sponsor you.' },
-      { id: 'credentials', icon: '📑', title: 'Credentials & tests', text: 'Help with WES/ECA, qualification recognition and preparing for IELTS, PTE or CELPIP.' },
-      { id: 'arrival', icon: '🧳', title: 'Accommodation & arrival', text: 'Find student housing or short-let accommodation, and plan your first weeks abroad.' },
-    ],
-  },
-  {
-    title: 'Visa application support',
-    services: [
-      { id: 'documents', icon: '📋', title: 'Document review', text: 'An adviser checks your documents against the requirements and flags weak points.' },
-      { id: 'route', icon: '🗺️', title: 'Route planning', text: 'Find the visa route that fits your goals, budget and profile.' },
-      { id: 'letters', icon: '✍️', title: 'Letters & statements', text: 'Help writing cover letters, statements of purpose and letters of explanation.' },
-      { id: 'interview', icon: '🎤', title: 'Interview preparation', text: 'Mock U.S. visa and credibility interviews with feedback.' },
-      { id: 'refusal', icon: '🔁', title: 'Refusal review', text: 'Understand why you were refused and plan a stronger reapplication.' },
-    ],
-  },
-];
-const SERVICES = SERVICE_GROUPS.flatMap((g) => g.services);
-const getService = (id) => SERVICES.find((s) => s.id === id);
-
-const QUALIFICATIONS = ['WAEC / NECO', 'OND / NCE', 'HND', 'Bachelor’s degree', 'Master’s degree', 'PhD'];
-
-// Extra questions shown for specific services.
-const EXTRA_FIELDS = {
-  level: { label: 'Level of study', options: ['Foundation / Diploma', 'Undergraduate', 'Master’s', 'PhD', 'Language course'] },
-  field: { label: 'Course / field of study', placeholder: 'e.g. Nursing, Computer Science, MBA' },
-  qualification: { label: 'Highest qualification', options: QUALIFICATIONS },
-  intake: { label: 'Preferred intake', placeholder: 'e.g. September 2027' },
-  budget: { label: 'Yearly tuition budget', options: ['Under ₦10m', '₦10m–₦25m', '₦25m–₦50m', 'Over ₦50m', 'Need full scholarship'] },
-  profession: { label: 'Profession / job title', placeholder: 'e.g. Registered Nurse, Software Engineer' },
-  experience: { label: 'Years of experience', options: ['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', 'Over 10 years'] },
-};
-const SERVICE_FIELDS = {
-  admission: ['level', 'field', 'qualification', 'intake', 'budget'],
-  scholarship: ['level', 'field', 'qualification', 'intake'],
-  job: ['profession', 'experience', 'qualification'],
-};
-const REQUIRED_EXTRAS = ['level', 'field', 'profession', 'experience'];
-
 const empty = {
   name: '', email: '', phone: '', state: '', objective: '', country: '', service: '', timeline: '', message: '', consent: false,
+  website: '', // honeypot — real users never see or fill this
   ...Object.fromEntries(Object.keys(EXTRA_FIELDS).map((k) => [k, ''])),
 };
 
@@ -75,6 +32,8 @@ export default function AssistPage() {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(null);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [requests, setRequests] = useState(() => load(STORAGE_KEY, []));
   const formRef = useRef(null);
 
@@ -111,24 +70,51 @@ export default function AssistPage() {
     return Object.keys(e).length === 0;
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-    // Keep only the extra answers that belong to the chosen service.
-    const extras = Object.fromEntries(extraFields.map((k) => [k, form[k]]));
-    const base = Object.fromEntries(Object.entries(form).filter(([k]) => !(k in EXTRA_FIELDS)));
-    const request = {
-      ...base,
-      details: extras,
-      ref: `VS-${Date.now().toString(36).toUpperCase()}`,
-      createdAt: new Date().toISOString(),
-      status: 'Received',
+    if (sending || !validate()) return;
+    const ref = `VS-${Date.now().toString(36).toUpperCase()}`;
+    const confirm = () => {
+      setSubmitted({ ref, name: form.name, email: form.email, phone: form.phone });
+      setForm(empty);
     };
-    const next = [request, ...requests];
-    setRequests(next);
-    save(STORAGE_KEY, next);
-    setSubmitted(request);
-    setForm(empty);
+    // Bots fill the hidden field; pretend success so they don't retry.
+    if (form.website) return confirm();
+
+    setSending(true);
+    setSendError('');
+    try {
+      // Firebase is loaded on demand so it doesn't weigh down the public pages.
+      const { submitRequest } = await import('../services/requests.js');
+      await submitRequest({
+        ref,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        state: form.state,
+        objective: form.objective,
+        country: form.country,
+        service: form.service,
+        timeline: form.timeline,
+        message: form.message.trim(),
+        // Keep only the extra answers that belong to the chosen service.
+        details: Object.fromEntries(extraFields.map((k) => [k, form[k].trim()])),
+        consentAt: new Date().toISOString(),
+      });
+      // A slim local copy powers the "Your requests" list for this visitor.
+      const next = [
+        { ref, service: form.service, objective: form.objective, country: form.country, createdAt: new Date().toISOString(), status: 'Sent' },
+        ...requests,
+      ];
+      setRequests(next);
+      save(STORAGE_KEY, next);
+      confirm();
+    } catch (err) {
+      console.error('Failed to submit request', err);
+      setSendError('We couldn’t send your request. Please check your connection and try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -188,7 +174,7 @@ export default function AssistPage() {
                   <button className="btn" onClick={() => setSubmitted(null)}>Submit another request</button>
                 </div>
               ) : (
-                <form className="card form" onSubmit={submit} noValidate>
+                <form className="card form" onSubmit={submit} onFocus={preloadFirebase} noValidate>
                   <h2>Request assistance</h2>
                   <div className="form-grid">
                     <Field label="Full name" error={errors.name}>
@@ -266,12 +252,22 @@ export default function AssistPage() {
                   <Field label="Tell us about your situation">
                     <textarea rows={5} value={form.message} onChange={set('message')} placeholder="e.g. I have a UK master's offer starting January, sponsored by my parents. I was refused once in 2024…" />
                   </Field>
+                  <div className="honeypot" aria-hidden="true">
+                    <label>
+                      Website
+                      <input tabIndex={-1} autoComplete="off" value={form.website} onChange={set('website')} />
+                    </label>
+                  </div>
                   <label className="consent">
                     <input type="checkbox" checked={form.consent} onChange={set('consent')} />
-                    I understand that VisaSolutions provides guidance only and cannot guarantee a visa decision.
+                    I agree that VisaSolutions may store my details to contact me about this request, and I understand
+                    that VisaSolutions provides guidance only and cannot guarantee any admission, job or visa decision.
                   </label>
                   {errors.consent && <span className="error">{errors.consent}</span>}
-                  <button type="submit" className="btn btn-gold">Submit request</button>
+                  {sendError && <div className="alert alert-error" role="alert">{sendError}</div>}
+                  <button type="submit" className="btn btn-gold" disabled={sending}>
+                    {sending ? 'Sending…' : 'Submit request'}
+                  </button>
                 </form>
               )}
             </div>
@@ -286,7 +282,7 @@ export default function AssistPage() {
                         <strong>{r.ref}</strong>
                         <span>{getService(r.service)?.title || r.service}</span>
                         <span className="muted">{getObjective(r.objective)?.title}{r.country && ` · ${countries[r.country]?.name || r.country}`}</span>
-                        <small className="muted">{new Date(r.createdAt).toLocaleDateString('en-NG')} · {r.status}</small>
+                        <small className="muted">{new Date(r.createdAt).toLocaleDateString('en-NG')} · {r.status === 'Received' ? 'Saved on this device only' : r.status}</small>
                       </li>
                     ))}
                   </ul>
@@ -300,6 +296,11 @@ export default function AssistPage() {
     </>
   );
 }
+
+// Start downloading Firebase once the visitor begins filling in the form (import() is cached).
+const preloadFirebase = () => {
+  import('../services/requests.js');
+};
 
 function Field({ label, error, children }) {
   return (

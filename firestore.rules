@@ -1,0 +1,67 @@
+rules_version = '2';
+
+// Deploy with: npx firebase-tools deploy --only firestore:rules
+// (or paste into Firebase console → Firestore → Rules).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admins are users whose uid has a document in /admins (created by hand in the console).
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function str(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    // Must match the payload built in src/pages/AssistPage.jsx and src/services/requests.js.
+    function validDetails(d) {
+      return d is map
+        && d.keys().hasOnly(['level', 'field', 'qualification', 'intake', 'budget', 'profession', 'experience'])
+        && str(d.get('level', ''), 0, 60)
+        && str(d.get('field', ''), 0, 200)
+        && str(d.get('qualification', ''), 0, 60)
+        && str(d.get('intake', ''), 0, 60)
+        && str(d.get('budget', ''), 0, 60)
+        && str(d.get('profession', ''), 0, 200)
+        && str(d.get('experience', ''), 0, 60);
+    }
+
+    function validNewRequest(d) {
+      return d.keys().hasOnly(['ref', 'name', 'email', 'phone', 'state', 'objective', 'country', 'service',
+                               'timeline', 'message', 'details', 'consentAt', 'status', 'createdAt'])
+        && d.keys().hasAll(['ref', 'name', 'email', 'phone', 'objective', 'service', 'consentAt', 'status', 'createdAt'])
+        && str(d.ref, 4, 30)
+        && str(d.name, 1, 120)
+        && str(d.email, 3, 200) && d.email.matches('.+@.+[.].+')
+        && str(d.phone, 7, 25)
+        && str(d.get('state', ''), 0, 40)
+        && str(d.objective, 1, 30)
+        && str(d.get('country', ''), 0, 30)
+        && str(d['service'], 1, 30) // `service` is a reserved word in rules, so use bracket access
+        && str(d.get('timeline', ''), 0, 60)
+        && str(d.get('message', ''), 0, 2000)
+        && validDetails(d.get('details', {}))
+        && str(d.consentAt, 10, 40)
+        && d.status == 'new'
+        && d.createdAt == request.time;
+    }
+
+    match /requests/{requestId} {
+      // Anyone may submit a well-formed request, but nobody except admins can read them back.
+      allow create: if validNewRequest(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note', 'updatedAt'])
+        && request.resource.data.status in ['new', 'contacted', 'in-progress', 'closed']
+        && str(request.resource.data.get('note', ''), 0, 2000)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

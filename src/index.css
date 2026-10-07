@@ -175,6 +175,46 @@ a.card:hover { transform: translateY(-3px); border-color: var(--green); }
 .alert { border-radius: var(--radius); padding: 16px 20px; margin: 16px 0; }
 .alert-warn { background: var(--warn-bg); border: 1px solid var(--warn-line); }
 .alert ul { margin: 8px 0 0; padding-left: 20px; }
+.alert-error { background: #fdecea; border: 1px solid #f5b5ae; color: var(--danger); }
+
+/* Hidden from people, still in the DOM for bots to fill. */
+.honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Admin dashboard */
+.admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.admin-user { display: flex; align-items: center; gap: 12px; }
+.admin-login { max-width: 420px; margin: 0 auto; }
+.admin-filters { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+button.chip { font: inherit; font-size: 0.9rem; cursor: pointer; }
+.chip-active { background: var(--green); border-color: var(--green); color: #fff; }
+.chip-active:hover { color: #fff; }
+.chip-count { display: inline-block; min-width: 22px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: rgba(0, 0, 0, 0.08); font-size: 0.8rem; text-align: center; }
+.admin-filter-row { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+.admin-filter-row select, .admin-filter-row input { font: inherit; padding: 9px 12px; border: 1px solid #c9d6cf; border-radius: 8px; background: #fff; }
+.admin-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.admin-row { padding: 0; overflow: hidden; }
+.admin-row.open { border-color: var(--green); }
+.admin-row-head {
+  width: 100%; display: grid; grid-template-columns: 110px 1fr auto; gap: 14px; align-items: center;
+  padding: 14px 18px; background: none; border: none; font: inherit; text-align: left; cursor: pointer;
+}
+.admin-row-head:hover { background: var(--bg-alt); }
+.admin-row-main { display: flex; flex-direction: column; min-width: 0; }
+.admin-row-meta { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.85rem; }
+.status-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; text-align: center; }
+.status-new { background: var(--gold); color: var(--ink); }
+.status-contacted { background: #dbeafe; color: #1e40af; }
+.status-in-progress { background: var(--green-light); color: var(--green-dark); }
+.status-closed { background: #e5e7eb; color: #4b5563; }
+.admin-row-body { padding: 4px 18px 18px; border-top: 1px solid var(--line); }
+.admin-details { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px 20px; margin: 14px 0; }
+.admin-details dt { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.admin-details dd { margin: 0; overflow-wrap: anywhere; }
+.admin-message { margin: 0 0 14px; padding: 12px 16px; background: var(--bg-alt); border-left: 3px solid var(--green); border-radius: 6px; white-space: pre-wrap; }
+.admin-actions { display: grid; grid-template-columns: 180px 1fr auto; gap: 12px; align-items: end; }
+.admin-actions .field { margin: 0; display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem; }
+.admin-actions select, .admin-actions textarea { font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid #c9d6cf; border-radius: 8px; }
 
 /* Forms */
 .field { margin-bottom: 16px; }
@@ -261,7 +301,9 @@ button.service.selected { border-color: var(--green); background: var(--green-li
     flex-direction: column; align-items: stretch; padding: 16px 20px; gap: 14px; border-bottom: 1px solid var(--line);
   }
   .nav-links.open { display: flex; }
-  .facts-strip, .form-grid { grid-template-columns: 1fr; }
+  .facts-strip, .form-grid, .admin-filter-row, .admin-actions { grid-template-columns: 1fr; }
+  .admin-row-head { grid-template-columns: 1fr; gap: 6px; }
+  .admin-row-meta { align-items: flex-start; }
   .hero { padding: 48px 0; }
   .section { padding: 40px 0; }
   .container { padding: 0 16px; }
