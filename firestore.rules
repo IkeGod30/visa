@@ -59,6 +59,50 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
 
+    // Must match src/services/payments.js. SERVICE_FEE in src/data/payment.js must equal the amount below.
+    function requestPath(id) {
+      return /databases/$(database)/documents/requests/$(id);
+    }
+
+    function validNewPayment(d) {
+      return d.keys().hasOnly(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method', 'reference',
+                               'senderName', 'senderBank', 'paidOn', 'status', 'createdAt'])
+        && d.keys().hasAll(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method', 'status', 'createdAt'])
+        && str(d.requestId, 1, 64)
+        && str(d.requestRef, 4, 30)
+        && str(d['service'], 1, 30)
+        && d.amount == 15000
+        && d.currency == 'NGN'
+        && d.status == 'awaiting-confirmation'
+        && d.createdAt == request.time
+        && (
+          (d.method == 'card'
+            && str(d.get('reference', ''), 6, 100)
+            && !d.keys().hasAny(['senderName', 'senderBank', 'paidOn']))
+          || (d.method == 'transfer'
+            && str(d.get('senderName', ''), 1, 120)
+            && str(d.get('senderBank', ''), 1, 80)
+            && d.get('paidOn', '').matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && !d.keys().hasAny(['reference']))
+        )
+        // The payment must point at a real request with the same reference and service.
+        && exists(requestPath(d.requestId))
+        && get(requestPath(d.requestId)).data.ref == d.requestRef
+        && get(requestPath(d.requestId)).data['service'] == d['service'];
+    }
+
+    match /payments/{paymentId} {
+      // Visitors can record a payment claim, but never read, edit or confirm one.
+      allow create: if validNewPayment(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note', 'reviewedAt', 'reviewedBy'])
+        && request.resource.data.status in ['awaiting-confirmation', 'confirmed', 'rejected']
+        && str(request.resource.data.get('note', ''), 0, 500)
+        && str(request.resource.data.get('reviewedBy', ''), 0, 200)
+        && request.resource.data.reviewedAt == request.time;
+    }
+
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;

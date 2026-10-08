@@ -177,6 +177,53 @@ a.card:hover { transform: translateY(-3px); border-color: var(--green); }
 .alert ul { margin: 8px 0 0; padding-left: 20px; }
 .alert-error { background: #fdecea; border: 1px solid #f5b5ae; color: var(--danger); }
 
+.alert-success { background: var(--green-light); border: 1px solid var(--green); }
+.alert-success h3 { margin-top: 0; }
+
+/* Payments */
+.service-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
+.price-tag { font-weight: 700; color: var(--green-dark); background: var(--green-light); border-radius: 999px; padding: 2px 10px; font-size: 0.85rem; }
+.fee-note {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 12px 16px; margin: 4px 0 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg-alt);
+}
+.fee-note strong { font-size: 1.15rem; color: var(--green-dark); }
+.fee-note small { flex-basis: 100%; }
+.payment-intro { border-bottom: 1px solid var(--line); margin-bottom: 18px; padding-bottom: 6px; }
+.payment-summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.payment-summary h3 { margin: 2px 0 0; }
+.payment-amount { font-size: 1.6rem; color: var(--green-dark); }
+.pay-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.pay-tabs button { font: inherit; font-weight: 600; padding: 12px; border: none; background: var(--bg-alt); cursor: pointer; color: var(--muted); }
+.pay-tabs button + button { border-left: 1px solid var(--line); }
+.pay-tabs button.active { background: #fff; color: var(--green); box-shadow: inset 0 -3px 0 var(--green); }
+.pay-pane { padding: 18px 2px 4px; }
+.bank-details { border: 1px dashed var(--green); border-radius: 10px; padding: 6px 16px; margin: 12px 0; background: var(--bg-alt); }
+.bank-details div { display: grid; grid-template-columns: 170px 1fr; gap: 8px; padding: 8px 0; align-items: center; }
+.bank-details div + div { border-top: 1px solid var(--line); }
+.bank-details dt { color: var(--muted); font-size: 0.9rem; }
+.bank-details dd { margin: 0; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.account-number { font-size: 1.2rem; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.copy-btn { font: inherit; font-size: 0.8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--green); background: #fff; color: var(--green); cursor: pointer; }
+.copy-btn:hover { background: var(--green-light); }
+.transfer-form { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 12px; }
+.transfer-form h4 { margin: 0 0 12px; }
+.pay-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.pay-unpaid { background: #fdecea; color: var(--danger); }
+.pay-awaiting { background: var(--warn-bg); color: #8a6100; border: 1px solid var(--warn-line); }
+.pay-confirmed { background: var(--green); color: #fff; }
+.pay-rejected { background: #e5e7eb; color: #4b5563; text-decoration: line-through; }
+.request-pay { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.request-list .pay-pill { margin-top: 6px; align-self: flex-start; }
+.admin-pay-alert { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.admin-payments { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 12px; }
+.admin-payments h4 { margin: 0 0 6px; }
+.payment-list { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-direction: column; gap: 10px; }
+.payment-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg-alt); }
+.payment-item-head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.payment-item .admin-details { margin: 10px 0; }
+.payment-actions { grid-template-columns: 1fr auto auto; }
+
 /* Hidden from people, still in the DOM for bots to fill. */
 .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
@@ -190,7 +237,7 @@ button.chip { font: inherit; font-size: 0.9rem; cursor: pointer; }
 .chip-active { background: var(--green); border-color: var(--green); color: #fff; }
 .chip-active:hover { color: #fff; }
 .chip-count { display: inline-block; min-width: 22px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: rgba(0, 0, 0, 0.08); font-size: 0.8rem; text-align: center; }
-.admin-filter-row { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
+.admin-filter-row { display: grid; grid-template-columns: 220px 220px 1fr; gap: 12px; }
 .admin-filter-row select, .admin-filter-row input { font: inherit; padding: 9px 12px; border: 1px solid #c9d6cf; border-radius: 8px; background: #fff; }
 .admin-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .admin-row { padding: 0; overflow: hidden; }
@@ -301,7 +348,8 @@ button.service.selected { border-color: var(--green); background: var(--green-li
     flex-direction: column; align-items: stretch; padding: 16px 20px; gap: 14px; border-bottom: 1px solid var(--line);
   }
   .nav-links.open { display: flex; }
-  .facts-strip, .form-grid, .admin-filter-row, .admin-actions { grid-template-columns: 1fr; }
+  .facts-strip, .form-grid, .admin-filter-row, .admin-actions, .payment-actions, .bank-details div { grid-template-columns: 1fr; }
+  .bank-details div { gap: 2px; }
   .admin-row-head { grid-template-columns: 1fr; gap: 6px; }
   .admin-row-meta { align-items: flex-start; }
   .hero { padding: 48px 0; }

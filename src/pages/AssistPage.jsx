@@ -5,7 +5,11 @@ import { countries } from '../data/countries.js';
 import { destinationsFor } from '../data/guides.js';
 import { load, save } from '../utils/storage.js';
 import ScamAlert from '../components/ScamAlert.jsx';
+import PaymentPanel from '../components/PaymentPanel.jsx';
 import { SERVICE_GROUPS, getService, EXTRA_FIELDS, SERVICE_FIELDS, REQUIRED_EXTRAS } from '../data/services.js';
+import { SERVICE_FEE, formatNaira } from '../data/payment.js';
+
+const FEE = formatNaira(SERVICE_FEE);
 
 const STORAGE_KEY = 'vs-requests';
 
@@ -31,6 +35,7 @@ export default function AssistPage() {
     service: getService(params.get('service')) ? params.get('service') : '',
   });
   const [errors, setErrors] = useState({});
+  // The request currently shown in the payment step ({ requestId, ref, service, name, email, isNew }).
   const [submitted, setSubmitted] = useState(null);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
@@ -55,6 +60,20 @@ export default function AssistPage() {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // The visitor has submitted card or transfer details; we still wait for an admin to confirm the money arrived.
+  const markPaymentSubmitted = (ref, method) => {
+    setRequests((prev) => {
+      const next = prev.map((r) => (r.ref === ref ? { ...r, paymentStatus: 'submitted', paymentMethod: method } : r));
+      save(STORAGE_KEY, next);
+      return next;
+    });
+  };
+
+  const openPayment = (entry) => {
+    setSubmitted({ ...entry, isNew: false });
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = 'Please enter your name.';
@@ -74,19 +93,19 @@ export default function AssistPage() {
     e.preventDefault();
     if (sending || !validate()) return;
     const ref = `VS-${Date.now().toString(36).toUpperCase()}`;
-    const confirm = () => {
-      setSubmitted({ ref, name: form.name, email: form.email, phone: form.phone });
+    // Bots fill the hidden field; pretend success so they don't retry (no requestId, so no payment step).
+    if (form.website) {
+      setSubmitted({ ref, name: form.name, email: form.email, isNew: true });
       setForm(empty);
-    };
-    // Bots fill the hidden field; pretend success so they don't retry.
-    if (form.website) return confirm();
+      return;
+    }
 
     setSending(true);
     setSendError('');
     try {
       // Firebase is loaded on demand so it doesn't weigh down the public pages.
       const { submitRequest } = await import('../services/requests.js');
-      await submitRequest({
+      const docRef = await submitRequest({
         ref,
         name: form.name.trim(),
         email: form.email.trim(),
@@ -101,14 +120,24 @@ export default function AssistPage() {
         details: Object.fromEntries(extraFields.map((k) => [k, form[k].trim()])),
         consentAt: new Date().toISOString(),
       });
-      // A slim local copy powers the "Your requests" list for this visitor.
-      const next = [
-        { ref, service: form.service, objective: form.objective, country: form.country, createdAt: new Date().toISOString(), status: 'Sent' },
-        ...requests,
-      ];
+      // A slim local copy powers the "Your requests" list (and "Pay now") for this visitor.
+      const entry = {
+        requestId: docRef.id,
+        ref,
+        service: form.service,
+        objective: form.objective,
+        country: form.country,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        createdAt: new Date().toISOString(),
+        status: 'Sent',
+        paymentStatus: 'unpaid',
+      };
+      const next = [entry, ...requests];
       setRequests(next);
       save(STORAGE_KEY, next);
-      confirm();
+      setSubmitted({ ...entry, isNew: true });
+      setForm(empty);
     } catch (err) {
       console.error('Failed to submit request', err);
       setSendError('We couldn’t send your request. Please check your connection and try again.');
@@ -124,7 +153,8 @@ export default function AssistPage() {
           <h1>Get Assistance</h1>
           <p className="lead">
             From securing admission or a job offer to submitting your visa application, tell us what you need and an
-            adviser will contact you about the next steps.
+            adviser will contact you about the next steps. Each service costs <strong>{FEE}</strong>, payable by debit
+            card or bank transfer.
           </p>
         </div>
       </section>
@@ -146,7 +176,10 @@ export default function AssistPage() {
                     <span className="objective-icon">{s.icon}</span>
                     <h3>{s.title}</h3>
                     <p>{s.text}</p>
-                    <span className="link-arrow">{form.service === s.id ? 'Selected ✓' : 'Request this →'}</span>
+                    <span className="service-foot">
+                      <span className="price-tag">{FEE}</span>
+                      <span className="link-arrow">{form.service === s.id ? 'Selected ✓' : 'Request this →'}</span>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -162,17 +195,13 @@ export default function AssistPage() {
           <div className="guide-layout" ref={formRef}>
             <div className="guide-main">
               {submitted ? (
-                <div className="card success">
-                  <h2>✅ Request received</h2>
-                  <p>
-                    Thank you, {submitted.name.split(' ')[0]}. Your reference number is <strong>{submitted.ref}</strong>.
-                  </p>
-                  <p className="muted">
-                    We will contact you at {submitted.email} or {submitted.phone}. We will never ask you to pay visa fees
-                    into a personal account.
-                  </p>
-                  <button className="btn" onClick={() => setSubmitted(null)}>Submit another request</button>
-                </div>
+                <PaymentPanel
+                  key={submitted.ref}
+                  request={submitted}
+                  isNew={submitted.isNew}
+                  onRecorded={(method) => markPaymentSubmitted(submitted.ref, method)}
+                  onClose={() => setSubmitted(null)}
+                />
               ) : (
                 <form className="card form" onSubmit={submit} onFocus={preloadFirebase} noValidate>
                   <h2>Request assistance</h2>
@@ -258,10 +287,16 @@ export default function AssistPage() {
                       <input tabIndex={-1} autoComplete="off" value={form.website} onChange={set('website')} />
                     </label>
                   </div>
+                  <div className="fee-note">
+                    <span>Service fee</span>
+                    <strong>{FEE}</strong>
+                    <small className="muted">Pay by debit card or bank transfer after you submit.</small>
+                  </div>
                   <label className="consent">
                     <input type="checkbox" checked={form.consent} onChange={set('consent')} />
-                    I agree that VisaSolutions may store my details to contact me about this request, and I understand
-                    that VisaSolutions provides guidance only and cannot guarantee any admission, job or visa decision.
+                    I agree that VisaSolutions may store my details to contact me about this request. I understand that the
+                    service fee is {FEE}, and that VisaSolutions provides guidance only and cannot guarantee any admission,
+                    job or visa decision.
                   </label>
                   {errors.consent && <span className="error">{errors.consent}</span>}
                   {sendError && <div className="alert alert-error" role="alert">{sendError}</div>}
@@ -283,6 +318,16 @@ export default function AssistPage() {
                         <span>{getService(r.service)?.title || r.service}</span>
                         <span className="muted">{getObjective(r.objective)?.title}{r.country && ` · ${countries[r.country]?.name || r.country}`}</span>
                         <small className="muted">{new Date(r.createdAt).toLocaleDateString('en-NG')} · {r.status === 'Received' ? 'Saved on this device only' : r.status}</small>
+                        {r.requestId && (
+                          r.paymentStatus === 'submitted' ? (
+                            <span className="pay-pill pay-awaiting">Payment sent · awaiting confirmation</span>
+                          ) : (
+                            <span className="request-pay">
+                              <span className="pay-pill pay-unpaid">Unpaid · {FEE}</span>
+                              <button type="button" className="btn btn-sm btn-gold" onClick={() => openPayment(r)}>Pay now</button>
+                            </span>
+                          )
+                        )}
                       </li>
                     ))}
                   </ul>
