@@ -4,7 +4,7 @@ import { objectives, getObjective } from '../data/objectives.js';
 import { destinationsFor } from '../data/guides.js';
 import { countries } from '../data/countries.js';
 
-const LANGUAGE_OBJECTIVES = ['study', 'work', 'relocation', 'family'];
+const LANGUAGE_OBJECTIVES = ['study', 'exchange', 'work', 'relocation', 'family'];
 
 // Each option: [value, label, points, advice shown when this option is chosen]
 function buildQuestions(objective) {

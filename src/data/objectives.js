@@ -51,6 +51,22 @@ export const objectives = [
     ],
   },
   {
+    id: 'exchange',
+    title: 'Student Exchange',
+    icon: '🔄',
+    tagline: 'A semester or year abroad through your university’s exchange or scholarship programme.',
+    description:
+      'Exchange programmes let you study abroad for a semester or a year while staying enrolled at your Nigerian university, often with tuition waived under an agreement between the two schools. You usually apply through your home university’s international office first, then apply for a visa using the documents the host university sends you.',
+    keyDoc: 'a nomination letter and acceptance from the host university',
+    generalDocs: ['passport', 'photos', 'exchangeLetters', 'enrolmentProof', 'academic', 'englishTest', 'bankStatement', 'sponsorLetter', 'medical'],
+    refusalReasons: [
+      'No proof that you remain enrolled at your Nigerian university and will return to finish your degree',
+      'Not enough funds for living costs during the exchange (scholarship letters must state what they cover)',
+      'Missing or unsigned nomination letter or learning agreement',
+      'Applying for the wrong visa type for the length of the programme',
+    ],
+  },
+  {
     id: 'work',
     title: 'Work Abroad',
     icon: '💼',

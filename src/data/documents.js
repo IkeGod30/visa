@@ -93,6 +93,16 @@ export const documents = {
     name: 'Medical report from Nigerian doctor',
     detail: 'Diagnosis, history, and referral explaining why treatment abroad is required.',
   },
+  exchangeLetters: {
+    name: 'Exchange nomination & acceptance letters',
+    detail: 'Your Nigerian university’s nomination letter, the host university’s acceptance letter, and the signed learning agreement listing your courses and dates.',
+    where: 'Your university’s international office (Centre for International Programmes / Directorate of Linkages).',
+  },
+  enrolmentProof: {
+    name: 'Proof of current enrolment',
+    detail: 'A letter from your Nigerian university confirming you are a registered student who will return to complete your degree.',
+    where: 'Your faculty office or Academic Registry.',
+  },
   onwardTicket: {
     name: 'Onward ticket & final destination visa',
     detail: 'Confirmed connecting flight and a valid visa for your final destination.',

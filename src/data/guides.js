@@ -73,6 +73,54 @@ const visitSchengen = {
   ],
 };
 
+const visitJapan = {
+  visa: 'Temporary Visitor (short-term stay) visa',
+  fee: 'Small fee, usually about the naira equivalent of ¥3,000 for single entry (check the embassy)',
+  processing: 'About 5 working days after acceptance, longer if referred to Tokyo',
+  stay: '15, 30 or 90 days',
+  requirements: [
+    'Invitation letter and letter of guarantee from your host or company in Japan, with their residence or company documents',
+    'Day-by-day schedule of your stay (taikizai yoteihyo)',
+    'Bank statements and employment letter or business documents',
+    'Flight reservation and accommodation details',
+  ],
+  tips: [
+    'Japan expects a detailed, realistic schedule. Vague plans are a common reason for delays.',
+    'Your host’s documents must be originals and recently issued.',
+  ],
+};
+
+const visitKorea = {
+  visa: 'Short-term visit visa (C-3)',
+  fee: 'About US$40 equivalent for single entry (check the embassy)',
+  processing: 'Often 2 weeks or more',
+  stay: 'Up to 90 days',
+  requirements: [
+    'Invitation letter and the inviter’s ID or business registration (for family or business visits)',
+    'Bank statements showing a healthy balance, and an employment certificate or business documents',
+    'Flight reservation, hotel booking and itinerary',
+    'Previous travel history, especially to OECD countries',
+  ],
+  tips: [
+    'Korea scrutinises applications from Nigeria closely, so submit complete, consistent and verifiable documents.',
+    'Travel history to countries such as the UK, US, Canada or Schengen states strengthens your application.',
+  ],
+};
+
+const visitChina = {
+  visa: 'Family visit (Q2) / Business (M) visa',
+  fee: 'Varies by visa and entries (see the visa centre fee table)',
+  processing: 'About 4 working days (express options available)',
+  stay: 'Usually 30–60 days per entry',
+  requirements: [
+    'Online application form confirmation and passport photo',
+    'Invitation letter from a relative in China (Q2) or a Chinese company (M), with a copy of the inviter’s ID',
+    'Round-trip flight reservation and accommodation details',
+    'Bank statements and employment letter',
+  ],
+  tips: ['Make sure the invitation letter includes your full details, the purpose and dates of travel, and the inviter’s signature.'],
+};
+
 const tourism = (base, extra) => ({
   ...base,
   requirements: [
@@ -89,6 +137,9 @@ export const guides = {
     us: visitUs,
     canada: visitCanada,
     schengen: visitSchengen,
+    japan: visitJapan,
+    korea: visitKorea,
+    china: visitChina,
   },
 
   tourism: {
@@ -96,6 +147,18 @@ export const guides = {
     schengen: tourism(visitSchengen, ['A first Schengen visa is often valid only for your trip dates. Using it properly helps you get longer visas later.']),
     us: tourism(visitUs),
     canada: tourism(visitCanada),
+    japan: { ...tourism(visitJapan), visa: 'Temporary Visitor visa (tourism)' },
+    korea: { ...tourism(visitKorea, ['Book through a Korean-registered travel agency if you want a group or package tour visa.']), visa: 'Short-term tourist visa (C-3-9)' },
+    china: {
+      ...tourism(visitChina),
+      visa: 'Tourist (L) visa',
+      requirements: [
+        'Online application form confirmation and passport photo',
+        'Round-trip flight reservation and hotel bookings for the whole stay, or an invitation letter if staying with someone',
+        'Day-by-day itinerary',
+        'Bank statements and employment letter',
+      ],
+    },
   },
 
   study: {
@@ -264,6 +327,151 @@ export const guides = {
         'Apply for the Ministry acceptance letter early. It can take several months.',
       ],
     },
+    japan: {
+      visa: 'Student visa (College Student)',
+      fee: 'Small fee, usually about the naira equivalent of ¥3,000 (check the embassy)',
+      processing: 'Certificate of Eligibility: 1–3 months; visa: about 5 working days',
+      stay: 'Length of your course (granted in periods of up to 4 years 3 months)',
+      requirements: [
+        'Certificate of Eligibility (CoE), which your Japanese school applies for on your behalf',
+        'Admission letter from the university or Japanese language school',
+        'Proof of funds for tuition and living costs (or a scholarship letter, e.g. MEXT)',
+        'Academic certificates and transcripts',
+        'Japanese language ability (e.g. JLPT) for Japanese-taught courses',
+      ],
+      tips: [
+        'The Japanese Government (MEXT) Scholarship can be applied for through the Embassy of Japan in Nigeria. It covers tuition, a monthly stipend and airfare.',
+        'Many universities offer English-taught degrees, and language schools are a common first step.',
+      ],
+    },
+    korea: {
+      visa: 'Student visa (D-2 degree / D-4 language course)',
+      fee: 'About US$40–60 equivalent (check the embassy)',
+      processing: 'Often 2–4 weeks',
+      stay: 'Length of your programme',
+      requirements: [
+        'Certificate of Admission from a Korean university or language institute',
+        'Proof of funds (degree students are often asked for around US$20,000, less for language courses), or a scholarship letter',
+        'Academic certificates verified or consular-confirmed for use in Korea',
+        'Study plan and, where applicable, a TOPIK (Korean) or English test score',
+      ],
+      tips: [
+        'The Global Korea Scholarship (GKS) is fully funded and includes a year of Korean language study. Check whether Nigeria is on this year’s list.',
+        'Banks may need to issue a balance certificate in a specific format, so ask the university for its template.',
+      ],
+    },
+    china: {
+      visa: 'Student visa (X1 over 180 days / X2 up to 180 days)',
+      fee: 'Varies (see the visa centre fee table)',
+      processing: 'About 4 working days after submission',
+      stay: 'X1: convert to a residence permit within 30 days of arrival',
+      requirements: [
+        'Admission notice from a Chinese university',
+        'JW201 or JW202 visa application form for study, issued by the university',
+        'Foreigner Physical Examination Form (for X1)',
+        'Passport, photo and online application confirmation',
+      ],
+      tips: [
+        'The Chinese Government Scholarship (CSC) is widely awarded to Nigerian students. Apply through the Chinese Embassy or directly to universities.',
+        'Many programmes, including medicine (MBBS) and engineering, are taught in English.',
+      ],
+    },
+  },
+
+  exchange: {
+    uk: {
+      visa: 'Standard Visitor (up to 6 months) or Student visa (longer)',
+      fee: '£127 (visitor) or £524 + Immigration Health Surcharge (student)',
+      processing: 'About 3 weeks after biometrics',
+      stay: 'Up to 6 months as a visitor; longer exchanges need a Student visa',
+      requirements: [
+        'Acceptance letter from the UK host institution (a CAS if you are on a Student visa)',
+        'Nomination letter from your Nigerian university and proof you will return to complete your degree',
+        'Proof of funds or a scholarship/exchange grant letter',
+        'TB test certificate if you will stay more than 6 months',
+      ],
+      tips: ['Exchanges of up to 6 months at an accredited institution can be done on a Standard Visitor visa. You cannot work on it.'],
+    },
+    us: {
+      visa: 'J-1 Exchange Visitor visa',
+      fee: '$185 MRV fee + $220 SEVIS I-901 fee',
+      processing: 'Depends on interview wait time',
+      stay: 'Programme dates on your DS-2019, plus a 30-day grace period',
+      requirements: [
+        'Form DS-2019 from your US programme sponsor (university or exchange organisation)',
+        'SEVIS I-901 fee receipt',
+        'Proof of funding (sponsor, scholarship or personal funds) matching the DS-2019',
+        'Evidence of ties to Nigeria, such as an enrolment letter and a plan to return',
+      ],
+      tips: [
+        'Some J-1 exchanges carry a 2-year home-residence requirement (212(e)). Check your DS-2019 and visa annotation.',
+        'Programmes such as Fulbright and the Global UGRAD exchange are funded by the U.S. government.',
+      ],
+    },
+    germany: {
+      visa: 'National (D) Student visa (over 90 days) or Schengen visa (up to 90 days)',
+      fee: '€75 (national) / €90 (Schengen)',
+      processing: 'Weeks to months, depending on appointment availability',
+      stay: 'Length of the exchange semester(s)',
+      requirements: [
+        'Acceptance letter from the German host university (e.g. under an Erasmus+ or DAAD partnership)',
+        'Nomination from your Nigerian university and a learning agreement',
+        'Proof of funds: a scholarship letter or blocked account',
+        'Health insurance',
+      ],
+      tips: ['Erasmus+ International Credit Mobility funds exchanges between EU and partner-country universities. Ask your international office about existing partnerships.'],
+    },
+    canada: {
+      visa: 'Study permit (over 6 months) or Visitor visa (6 months or less)',
+      fee: 'CAD 150 (study permit) or CAD 100 (visitor) + CAD 85 biometrics',
+      processing: 'Varies. Check the IRCC processing times',
+      stay: 'Length of the exchange',
+      requirements: [
+        'Letter of acceptance from the Canadian institution stating the exchange dates',
+        'Letter from your Nigerian university confirming the exchange and that you will return',
+        'Proof of funds for living costs',
+        'Biometrics, and a medical exam if required',
+      ],
+      tips: ['Exchanges of 6 months or less generally don’t need a study permit, but you still need a visitor visa.'],
+    },
+    japan: {
+      visa: 'Student visa (exchange)',
+      fee: 'Small fee, usually about the naira equivalent of ¥3,000',
+      processing: 'Certificate of Eligibility: 1–3 months; visa: about 5 working days',
+      stay: 'Length of the exchange (typically 6–12 months)',
+      requirements: [
+        'Certificate of Eligibility arranged by the Japanese host university',
+        'Exchange acceptance letter and nomination from your Nigerian university',
+        'Proof of funds or scholarship (e.g. JASSO Student Exchange Support Program)',
+      ],
+      tips: ['JASSO scholarships support short-term exchange students at Japanese partner universities. Ask your international office.'],
+    },
+    korea: {
+      visa: 'Exchange student visa (D-2-6)',
+      fee: 'About US$40–60 equivalent',
+      processing: 'Often 2–4 weeks',
+      stay: 'Length of the exchange',
+      requirements: [
+        'Certificate of Admission as an exchange student from the Korean university',
+        'Exchange agreement or nomination letter from your Nigerian university',
+        'Proof of funds or a scholarship letter',
+        'Verified academic documents',
+      ],
+      tips: ['Exchange students usually pay tuition at home under the partnership agreement. Make sure your letters state this.'],
+    },
+    china: {
+      visa: 'Student visa (X2 up to 180 days / X1 longer)',
+      fee: 'Varies (see the visa centre fee table)',
+      processing: 'About 4 working days',
+      stay: 'Length of the exchange',
+      requirements: [
+        'Admission notice from the Chinese host university',
+        'JW202 form (or JW201 for scholarship holders)',
+        'Exchange nomination letter from your Nigerian university',
+        'Physical examination form for exchanges over 180 days',
+      ],
+      tips: ['Confucius Institute and CSC scholarships fund many short exchange and language programmes in China.'],
+    },
   },
 
   work: {
@@ -410,6 +618,51 @@ export const guides = {
         'English test (IELTS or PTE)',
       ],
       tips: ['Some streams can lead to permanent residence after a period of sponsored employment.'],
+    },
+    japan: {
+      visa: 'Work visa (e.g. Engineer/Specialist in Humanities/International Services) or Specified Skilled Worker',
+      fee: 'Small fee, usually about the naira equivalent of ¥3,000',
+      processing: 'Certificate of Eligibility: 1–3 months; visa: about 5 working days',
+      stay: '1, 3 or 5 years, renewable',
+      requirements: [
+        'Job offer and Certificate of Eligibility obtained by your Japanese employer',
+        'University degree related to the job, or about 10 years of relevant experience',
+        'For Specified Skilled Worker: a pass in the sector skills test and Japanese language (around JLPT N4)',
+        'Employment contract stating salary and duties',
+      ],
+      tips: [
+        'Learning Japanese greatly widens your options. Many skilled-worker routes require it.',
+        'The Highly Skilled Professional points system offers faster permanent residence for high earners and graduates.',
+      ],
+    },
+    korea: {
+      visa: 'Professional employment visa (E-7) / Job-seeker visa (D-10)',
+      fee: 'About US$40–60 equivalent',
+      processing: 'Several weeks (the employer usually obtains a visa issuance number first)',
+      stay: 'Up to 3 years, renewable',
+      requirements: [
+        'Employment contract with a Korean company and the employer’s sponsorship documents',
+        'Degree and/or experience matching the E-7 occupation list',
+        'Verified academic certificates and a police character certificate',
+        'For D-10: a degree (often from a Korean university) and enough points to qualify',
+      ],
+      tips: [
+        'Nigeria is not part of Korea’s Employment Permit System (E-9) for low-skilled work, so be wary of agents offering "factory jobs in Korea".',
+        'Graduates of Korean universities can switch to D-10 to look for work after graduating.',
+      ],
+    },
+    china: {
+      visa: 'Work (Z) visa',
+      fee: 'Varies (see the visa centre fee table)',
+      processing: 'Work permit notice: weeks; visa: about 4 working days',
+      stay: 'Convert to a work-type residence permit within 30 days of arrival',
+      requirements: [
+        'Notification Letter of Foreigner’s Work Permit, obtained by your Chinese employer',
+        'Bachelor’s degree and usually 2+ years of relevant experience',
+        'Police character certificate and degree certificate, authenticated for use in China',
+        'Medical examination',
+      ],
+      tips: ['Never enter China on a tourist or business visa to work. Working without a Z visa and work permit can lead to fines and deportation.'],
     },
   },
 
@@ -610,6 +863,19 @@ export const guides = {
         'Proof of how treatment will be paid for',
       ],
       tips: ['For urgent medical cases you can ask for an expedited appointment once you have booked one.'],
+    },
+    korea: {
+      visa: 'Medical tourism visa (C-3-3, or G-1-10 for long treatment)',
+      fee: 'About US$40 equivalent',
+      processing: 'Often 1–2 weeks',
+      stay: 'Up to 90 days (C-3-3); longer for G-1-10',
+      requirements: [
+        'Invitation or appointment confirmation from a Korean hospital registered for international patients',
+        'Medical reports from your Nigerian doctor',
+        'Proof you can pay for the treatment and your stay',
+        'A companion (family member) can apply for a matching visa',
+      ],
+      tips: ['Many Korean hospitals have international patient centres that help with the invitation letter and visa documents.'],
     },
   },
 

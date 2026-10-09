@@ -20,7 +20,7 @@ export default function HomePage() {
             <p className="eyebrow">For Nigerians travelling abroad</p>
             <h1>Get the right visa, the right way.</h1>
             <p className="lead">
-              Step-by-step advice on visas for the UK, USA, Canada, Western and Eastern Europe, Australia and more, written for
+              Step-by-step advice on visas for the UK, USA, Canada, Europe, Japan, South Korea, China, Australia and more, written for
               applicants in Lagos, Abuja and across Nigeria.
             </p>
             <div className="hero-actions">
@@ -37,6 +37,8 @@ export default function HomePage() {
               <li><Link to="/purpose/work/germany">🇩🇪 Germany Opportunity Card</Link></li>
               <li><Link to="/purpose/study/poland">🇵🇱 Poland student visa</Link></li>
               <li><Link to="/purpose/study/hungary">🇭🇺 Hungary study (Stipendium Hungaricum)</Link></li>
+              <li><Link to="/purpose/study/china">🇨🇳 China study (CSC scholarship)</Link></li>
+              <li><Link to="/purpose/exchange/us">🇺🇸 J-1 student exchange</Link></li>
             </ul>
           </div>
         </div>
