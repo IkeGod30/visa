@@ -108,13 +108,13 @@ const visitKorea = {
 };
 
 const visitChina = {
-  visa: 'Family visit (Q2) / Business (M) visa',
+  visa: 'Family visit (Q2) visa',
   fee: 'Varies by visa and entries (see the visa centre fee table)',
   processing: 'About 4 working days (express options available)',
   stay: 'Usually 30–60 days per entry',
   requirements: [
     'Online application form confirmation and passport photo',
-    'Invitation letter from a relative in China (Q2) or a Chinese company (M), with a copy of the inviter’s ID',
+    'Invitation letter from your relative in China, with a copy of their ID or residence permit and proof of your relationship',
     'Round-trip flight reservation and accommodation details',
     'Bank statements and employment letter',
   ],
@@ -140,6 +140,115 @@ export const guides = {
     japan: visitJapan,
     korea: visitKorea,
     china: visitChina,
+  },
+
+  business: {
+    uk: {
+      ...visitUk,
+      visa: 'Standard Visitor visa (business)',
+      requirements: [
+        'Invitation letter from the UK company or event organiser, stating the purpose, dates and who pays',
+        'Letter from your employer confirming your role, salary and that the trip is on company business',
+        'If you own the business: CAC certificate, tax clearance and 6 months of company bank statements',
+        'Conference or trade fair registration, if attending one',
+      ],
+      tips: [
+        'Permitted activities include meetings, conferences, negotiating contracts and site visits. Doing paid or hands-on work is not allowed.',
+        'If your Nigerian employer is paying, its letter should say so and the company statements should support it.',
+      ],
+    },
+    us: {
+      ...visitUs,
+      visa: 'B-1 Business visitor visa',
+      requirements: [
+        'DS-160 confirmation page and interview appointment letter',
+        'Invitation from the U.S. company or conference registration, with the agenda',
+        'Employer letter or your own company documents (CAC, tax clearance, company statements)',
+        'Evidence of strong ties to Nigeria',
+      ],
+      tips: [
+        'Be ready to explain your business, its relationship with the U.S. company, and exactly what you will do on the trip.',
+        'You cannot receive a salary from a U.S. source on a B-1 visa.',
+        ...visitUs.tips.slice(1),
+      ],
+    },
+    canada: {
+      ...visitCanada,
+      visa: 'Visitor visa (business visitor)',
+      requirements: [
+        'Invitation letter from the Canadian company with your host’s contact details',
+        'Letter from your employer supporting the trip, or your own company documents',
+        'Proof of funds (personal or company) to cover the trip',
+        'Conference or trade show registration, if applicable',
+      ],
+      tips: [
+        'Business visitors must not enter the Canadian labour market. Your main source of pay and your employer must stay outside Canada.',
+        ...visitCanada.tips,
+      ],
+    },
+    schengen: {
+      ...visitSchengen,
+      visa: 'Schengen business (Type C) visa',
+      requirements: [
+        'Invitation from a company in the Schengen country, with its registration details',
+        'Employer letter or your own company documents (CAC, tax clearance, company statements)',
+        'Travel medical insurance with at least €30,000 cover',
+        'Trade fair or conference registration, flight reservation and accommodation',
+      ],
+      tips: [
+        'For trade fairs (e.g. in Germany or Italy), the organiser can usually issue an invitation letter once you register.',
+        'Keep a good record with your first visas. Regular business travellers can later be given multiple-entry visas.',
+        visitSchengen.tips[0],
+      ],
+    },
+    china: {
+      ...visitChina,
+      visa: 'Business (M) visa',
+      requirements: [
+        'Online application form confirmation and passport photo',
+        'Invitation letter from your Chinese trading partner or trade fair organiser (e.g. Canton Fair), with their business licence copy',
+        'Your company documents (CAC certificate) or employer letter',
+        'Round-trip flight reservation and accommodation details',
+      ],
+      tips: [
+        'The Canton Fair in Guangzhou (spring and autumn) is popular with Nigerian traders. Registered buyers can get an invitation from the organiser.',
+        'Inspect goods and verify suppliers before making large payments, and use trade assurance or inspection services where possible.',
+      ],
+    },
+    japan: {
+      ...visitJapan,
+      visa: 'Temporary Visitor visa (short-term business)',
+      requirements: [
+        'Invitation letter and letter of guarantee from the Japanese company, with its company registration',
+        'Schedule of your business activities in Japan',
+        'Letter from your employer, or your own company documents',
+        'Documents showing the business relationship (contracts, correspondence, invoices)',
+      ],
+      tips: ['Japanese companies are used to providing these documents. Ask your contact early, because originals must be posted to you.'],
+    },
+    korea: {
+      ...visitKorea,
+      visa: 'Short-term business visa (C-3-4)',
+      requirements: [
+        'Invitation letter from the Korean company and its business registration certificate',
+        'Employment certificate, or your own company documents (CAC, tax clearance)',
+        'Evidence of the business relationship (contracts, purchase orders, correspondence)',
+        'Bank statements and flight reservation',
+      ],
+      tips: ['Korea checks that the inviting company is genuine and active. Make sure your contact can be reached by the embassy.'],
+    },
+    india: {
+      visa: 'e-Business visa',
+      fee: 'Depends on nationality (shown on the portal)',
+      processing: 'Usually a few days',
+      stay: 'As granted (multiple entry; each stay is limited)',
+      requirements: [
+        'Business card or email signature, plus an invitation letter from the Indian company',
+        'Details of the Indian company and the Nigerian company',
+        'Passport bio-page scan and photo',
+      ],
+      tips: ['Apply only on the official Indian government e-Visa portal. Lookalike sites charge extra fees.'],
+    },
   },
 
   tourism: {

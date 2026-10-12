@@ -93,6 +93,11 @@ export const documents = {
     name: 'Medical report from Nigerian doctor',
     detail: 'Diagnosis, history, and referral explaining why treatment abroad is required.',
   },
+  businessInvitation: {
+    name: 'Business invitation letter',
+    detail: 'On the host company’s letterhead: your name and passport number, the purpose, dates, places, who pays for the trip, and the host’s contact details. Add their company registration and any event registration (conference or trade fair badge).',
+    where: 'The company or event organiser you are visiting.',
+  },
   exchangeLetters: {
     name: 'Exchange nomination & acceptance letters',
     detail: 'Your Nigerian university’s nomination letter, the host university’s acceptance letter, and the signed learning agreement listing your courses and dates.',

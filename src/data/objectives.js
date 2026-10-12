@@ -4,9 +4,9 @@ export const objectives = [
     id: 'visit',
     title: 'Short Visit',
     icon: '🤝',
-    tagline: 'Visit family or friends, attend a wedding, conference or business meeting.',
+    tagline: 'Visit family or friends, or attend a wedding, graduation or other event.',
     description:
-      'Short-stay visas let you visit for a limited period (usually up to 90 days or 6 months) without working or studying. The embassy mainly wants proof that you have a genuine reason to travel and strong reasons to return to Nigeria.',
+      'Short-stay visas let you visit for a limited period (usually up to 90 days or 6 months) without working or studying. The embassy mainly wants proof that you have a genuine reason to travel and strong reasons to return to Nigeria. For meetings, conferences or trade fairs, see Business.',
     keyDoc: 'an invitation letter or confirmed purpose of visit',
     generalDocs: ['passport', 'photos', 'bankStatement', 'employment', 'business', 'itinerary', 'travelHistory'],
     refusalReasons: [
@@ -15,6 +15,22 @@ export const objectives = [
       'Inconsistent information between the form, invitation letter and interview',
       'Unclear purpose of trip or vague itinerary',
       'Undisclosed previous refusals or overstays',
+    ],
+  },
+  {
+    id: 'business',
+    title: 'Business',
+    icon: '📊',
+    tagline: 'Meetings, conferences, trade fairs, sourcing goods and negotiating deals.',
+    description:
+      'Business visitor visas cover short trips to meet partners, attend conferences or trade fairs, inspect goods or negotiate contracts. They do not allow you to take a job or be paid by a company in that country. Embassies look for a clear business purpose, a genuine company behind it, and strong reasons for you to return to Nigeria.',
+    keyDoc: 'an invitation letter from the foreign company or event organiser',
+    generalDocs: ['passport', 'photos', 'businessInvitation', 'employment', 'business', 'bankStatement', 'itinerary', 'travelHistory'],
+    refusalReasons: [
+      'Invitation from a company that cannot be verified, or that does not match your line of business',
+      'Business documents (CAC, tax clearance, company statements) missing or inconsistent with your claimed role',
+      'Signs that the trip is really for work, such as being paid by the host company or doing hands-on work',
+      'Personal or company funds that look too low for the trip, or sudden unexplained deposits',
     ],
   },
   {

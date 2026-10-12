@@ -109,13 +109,13 @@ export default function HomePage() {
                 <span className="objective-icon">{o.icon}</span>
                 <h3>{o.title}</h3>
                 <p>{o.tagline}</p>
-                <span className="flags">
+                {/* <span className="flags">
                   {destinationsFor(o.id).map((c) => (
                     <span key={c} title={countries[c].name}>
                       {countries[c].flag}
                     </span>
                   ))}
-                </span>
+                </span> */}
               </Link>
             ))}
           </div>
