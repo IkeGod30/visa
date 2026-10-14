@@ -38,7 +38,7 @@ export default function HomePage() {
             <p className="lead">
               Step-by-step advice on visas for the UK, USA, Canada, Europe,
               Japan, South Korea, China, Australia and more, written for
-              applicants in Lagos, Abuja and across Nigeria.
+              applicants in Nigeria.
             </p>
             <p className="lead">
               Even if you don't have a specific destination in mind, we can help
@@ -109,13 +109,6 @@ export default function HomePage() {
                 <span className="objective-icon">{o.icon}</span>
                 <h3>{o.title}</h3>
                 <p>{o.tagline}</p>
-                {/* <span className="flags">
-                  {destinationsFor(o.id).map((c) => (
-                    <span key={c} title={countries[c].name}>
-                      {countries[c].flag}
-                    </span>
-                  ))}
-                </span> */}
               </Link>
             ))}
           </div>

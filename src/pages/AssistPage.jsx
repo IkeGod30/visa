@@ -1,52 +1,106 @@
-import { useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { objectives, getObjective } from '../data/objectives.js';
-import { countries } from '../data/countries.js';
-import { destinationsFor } from '../data/guides.js';
-import { load, save } from '../utils/storage.js';
-import ScamAlert from '../components/ScamAlert.jsx';
-import PaymentPanel from '../components/PaymentPanel.jsx';
-import { SERVICE_GROUPS, getService, EXTRA_FIELDS, SERVICE_FIELDS, REQUIRED_EXTRAS } from '../data/services.js';
-import { SERVICE_FEE, formatNaira } from '../data/payment.js';
+import { useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { objectives, getObjective } from "../data/objectives.js";
+import { countries } from "../data/countries.js";
+import { destinationsFor } from "../data/guides.js";
+import { load, save } from "../utils/storage.js";
+import ScamAlert from "../components/ScamAlert.jsx";
+import PaymentPanel from "../components/PaymentPanel.jsx";
+import {
+  SERVICE_GROUPS,
+  getService,
+  EXTRA_FIELDS,
+  SERVICE_FIELDS,
+  REQUIRED_EXTRAS,
+} from "../data/services.js";
+import { SERVICE_FEE, formatNaira } from "../data/payment.js";
 
 const FEE = formatNaira(SERVICE_FEE);
 
-const STORAGE_KEY = 'vs-requests';
+const STORAGE_KEY = "vs-requests";
 
 const STATES = [
-  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta', 'Ebonyi',
-  'Edo', 'Ekiti', 'Enugu', 'FCT – Abuja', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara',
-  'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
-  'Outside Nigeria',
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "FCT – Abuja",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+  "Outside Nigeria",
 ];
 
 const empty = {
-  name: '', email: '', phone: '', state: '', objective: '', country: '', service: '', timeline: '', message: '', consent: false,
-  website: '', // honeypot — real users never see or fill this
-  ...Object.fromEntries(Object.keys(EXTRA_FIELDS).map((k) => [k, ''])),
+  name: "",
+  email: "",
+  phone: "",
+  state: "",
+  objective: "",
+  country: "",
+  service: "",
+  timeline: "",
+  message: "",
+  consent: false,
+  website: "", // honeypot — real users never see or fill this
+  ...Object.fromEntries(Object.keys(EXTRA_FIELDS).map((k) => [k, ""])),
 };
 
 export default function AssistPage() {
   const [params] = useSearchParams();
   const [form, setForm] = useState({
     ...empty,
-    objective: params.get('objective') || '',
-    country: params.get('country') || '',
-    service: getService(params.get('service')) ? params.get('service') : '',
+    objective: params.get("objective") || "",
+    country: params.get("country") || "",
+    service: getService(params.get("service")) ? params.get("service") : "",
   });
   const [errors, setErrors] = useState({});
   // The request currently shown in the payment step ({ requestId, ref, service, name, email, isNew }).
   const [submitted, setSubmitted] = useState(null);
   const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState('');
+  const [sendError, setSendError] = useState("");
   const [requests, setRequests] = useState(() => load(STORAGE_KEY, []));
   const formRef = useRef(null);
 
   const objective = getObjective(form.objective);
   const extraFields = SERVICE_FIELDS[form.service] || [];
   const set = (field) => (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((f) => ({ ...f, [field]: value, ...(field === 'objective' ? { country: '' } : {}) }));
+    const value =
+      e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setForm((f) => ({
+      ...f,
+      [field]: value,
+      ...(field === "objective" ? { country: "" } : {}),
+    }));
   };
 
   // Picking a service card selects it in the form and suggests a matching travel purpose.
@@ -55,15 +109,21 @@ export default function AssistPage() {
     setForm((f) => ({
       ...f,
       service: service.id,
-      ...(service.objective && !f.objective ? { objective: service.objective, country: '' } : {}),
+      ...(service.objective && !f.objective
+        ? { objective: service.objective, country: "" }
+        : {}),
     }));
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   // The visitor has submitted card or transfer details; we still wait for an admin to confirm the money arrived.
   const markPaymentSubmitted = (ref, method) => {
     setRequests((prev) => {
-      const next = prev.map((r) => (r.ref === ref ? { ...r, paymentStatus: 'submitted', paymentMethod: method } : r));
+      const next = prev.map((r) =>
+        r.ref === ref
+          ? { ...r, paymentStatus: "submitted", paymentMethod: method }
+          : r,
+      );
       save(STORAGE_KEY, next);
       return next;
     });
@@ -71,20 +131,27 @@ export default function AssistPage() {
 
   const openPayment = (entry) => {
     setSubmitted({ ...entry, isNew: false });
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = 'Please enter your name.';
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = 'Please enter a valid email address.';
-    if (!/^(\+?234|0)[789][01]\d{8}$/.test(form.phone.replace(/[\s-]/g, ''))) e.phone = 'Enter a valid Nigerian number, e.g. 0803 123 4567 or +234 803 123 4567.';
-    if (!form.objective) e.objective = 'Select your purpose of travel.';
-    if (!form.service) e.service = 'Select the help you need.';
+    if (!form.name.trim()) e.name = "Please enter your name.";
+    if (!/^\S+@\S+\.\S+$/.test(form.email))
+      e.email = "Please enter a valid email address.";
+    if (!/^(\+?234|0)[789][01]\d{8}$/.test(form.phone.replace(/[\s-]/g, "")))
+      e.phone =
+        "Enter a valid Nigerian number, e.g. 0803 123 4567 or +234 803 123 4567.";
+    if (!form.objective) e.objective = "Select your purpose of travel.";
+    if (!form.service) e.service = "Select the help you need.";
     extraFields
       .filter((k) => REQUIRED_EXTRAS.includes(k) && !form[k].trim())
-      .forEach((k) => (e[k] = `Please provide your ${EXTRA_FIELDS[k].label.toLowerCase()}.`));
-    if (!form.consent) e.consent = 'Please confirm to continue.';
+      .forEach(
+        (k) =>
+          (e[k] =
+            `Please provide your ${EXTRA_FIELDS[k].label.toLowerCase()}.`),
+      );
+    if (!form.consent) e.consent = "Please confirm to continue.";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -101,10 +168,10 @@ export default function AssistPage() {
     }
 
     setSending(true);
-    setSendError('');
+    setSendError("");
     try {
       // Firebase is loaded on demand so it doesn't weigh down the public pages.
-      const { submitRequest } = await import('../services/requests.js');
+      const { submitRequest } = await import("../services/requests.js");
       const docRef = await submitRequest({
         ref,
         name: form.name.trim(),
@@ -117,7 +184,9 @@ export default function AssistPage() {
         timeline: form.timeline,
         message: form.message.trim(),
         // Keep only the extra answers that belong to the chosen service.
-        details: Object.fromEntries(extraFields.map((k) => [k, form[k].trim()])),
+        details: Object.fromEntries(
+          extraFields.map((k) => [k, form[k].trim()]),
+        ),
         consentAt: new Date().toISOString(),
       });
       // A slim local copy powers the "Your requests" list (and "Pay now") for this visitor.
@@ -130,8 +199,8 @@ export default function AssistPage() {
         name: form.name.trim(),
         email: form.email.trim(),
         createdAt: new Date().toISOString(),
-        status: 'Sent',
-        paymentStatus: 'unpaid',
+        status: "Sent",
+        paymentStatus: "unpaid",
       };
       const next = [entry, ...requests];
       setRequests(next);
@@ -139,8 +208,10 @@ export default function AssistPage() {
       setSubmitted({ ...entry, isNew: true });
       setForm(empty);
     } catch (err) {
-      console.error('Failed to submit request', err);
-      setSendError('We couldn’t send your request. Please check your connection and try again.');
+      console.error("Failed to submit request", err);
+      setSendError(
+        "We couldn’t send your request. Please check your connection and try again.",
+      );
     } finally {
       setSending(false);
     }
@@ -152,15 +223,43 @@ export default function AssistPage() {
         <div className="container">
           <h1>Get Assistance</h1>
           <p className="lead">
-            From securing admission or a job offer to submitting your visa application, tell us what you need and an
-            adviser will contact you about the next steps. Each service costs <strong>{FEE}</strong>, payable by debit
-            card or bank transfer.
+            From securing admission or a job offer to submitting your visa
+            application, tell us what you need and an adviser will contact you
+            about the next steps. Each service costs <strong>{FEE}</strong>,
+            payable by debit card or bank transfer.
           </p>
         </div>
       </section>
 
       <section className="section">
         <div className="container">
+          <aside className="trust-callout">
+            <span className="trust-callout-icon" aria-hidden="true">
+              🧭
+            </span>
+            <div>
+              <p>
+                The desperation to travel abroad has unfortunately pushed
+                inexperienced people to travel to unsafe places. So-called visa
+                agents have misled people into risking their lives and wasting
+                hard-earned or borrowed funds and time.
+              </p>
+              <p>
+                <strong>
+                  With over 30 years of travel experience, we can properly
+                  educate and guide you.
+                </strong>{" "}
+                We provide extremely useful insights into countries, regions and
+                cities to enable you make informed decisions.
+              </p>
+              <p>
+                We will tell you what locations are safe and which ones to
+                avoid, and how to get the best value for your money. We will
+                also help you avoid scams.
+              </p>
+            </div>
+          </aside>
+
           {SERVICE_GROUPS.map((group) => (
             <div key={group.title} className="service-group">
               <h2 className="section-title">{group.title}</h2>
@@ -169,7 +268,7 @@ export default function AssistPage() {
                   <button
                     key={s.id}
                     type="button"
-                    className={`card service ${form.service === s.id ? 'selected' : ''}`}
+                    className={`card service ${form.service === s.id ? "selected" : ""}`}
                     onClick={() => chooseService(s)}
                     aria-pressed={form.service === s.id}
                   >
@@ -178,7 +277,11 @@ export default function AssistPage() {
                     <p>{s.text}</p>
                     <span className="service-foot">
                       <span className="price-tag">{FEE}</span>
-                      <span className="link-arrow">{form.service === s.id ? 'Selected ✓' : 'Request this →'}</span>
+                      <span className="link-arrow">
+                        {form.service === s.id
+                          ? "Selected ✓"
+                          : "Request this →"}
+                      </span>
                     </span>
                   </button>
                 ))}
@@ -187,9 +290,10 @@ export default function AssistPage() {
           ))}
 
           <div className="alert alert-warn">
-            <strong>How we help with admissions and jobs:</strong> we guide you to apply directly to real schools and
-            employers. We never sell admission letters, job offers, Certificates of Sponsorship or LMIAs. Decisions are
-            made only by the institution, employer or embassy.
+            <strong>How we help with admissions and jobs:</strong> we guide you
+            to apply directly to real schools and employers. We never sell
+            admission letters, job offers, Certificates of Sponsorship or LMIAs.
+            Decisions are made only by the institution, employer or embassy.
           </div>
 
           <div className="guide-layout" ref={formRef}>
@@ -199,54 +303,96 @@ export default function AssistPage() {
                   key={submitted.ref}
                   request={submitted}
                   isNew={submitted.isNew}
-                  onRecorded={(method) => markPaymentSubmitted(submitted.ref, method)}
+                  onRecorded={(method) =>
+                    markPaymentSubmitted(submitted.ref, method)
+                  }
                   onClose={() => setSubmitted(null)}
                 />
               ) : (
-                <form className="card form" onSubmit={submit} onFocus={preloadFirebase} noValidate>
+                <form
+                  className="card form"
+                  onSubmit={submit}
+                  onFocus={preloadFirebase}
+                  noValidate
+                >
                   <h2>Request assistance</h2>
                   <div className="form-grid">
                     <Field label="Full name" error={errors.name}>
-                      <input value={form.name} onChange={set('name')} autoComplete="name" />
+                      <input
+                        value={form.name}
+                        onChange={set("name")}
+                        autoComplete="name"
+                      />
                     </Field>
                     <Field label="Email" error={errors.email}>
-                      <input type="email" value={form.email} onChange={set('email')} autoComplete="email" />
+                      <input
+                        type="email"
+                        value={form.email}
+                        onChange={set("email")}
+                        autoComplete="email"
+                      />
                     </Field>
                     <Field label="Phone / WhatsApp" error={errors.phone}>
-                      <input type="tel" value={form.phone} onChange={set('phone')} placeholder="0803 123 4567" autoComplete="tel" />
+                      <input
+                        type="tel"
+                        value={form.phone}
+                        onChange={set("phone")}
+                        placeholder="0803 123 4567"
+                        autoComplete="tel"
+                      />
                     </Field>
                     <Field label="State of residence">
-                      <select value={form.state} onChange={set('state')}>
+                      <select value={form.state} onChange={set("state")}>
                         <option value="">Select…</option>
-                        {STATES.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="Purpose of travel" error={errors.objective}>
-                      <select value={form.objective} onChange={set('objective')}>
-                        <option value="">Select…</option>
-                        {objectives.map((o) => <option key={o.id} value={o.id}>{o.title}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="Destination">
-                      <select value={form.country} onChange={set('country')} disabled={!objective}>
-                        <option value="">Not sure yet</option>
-                        {objective && destinationsFor(objective.id).map((c) => (
-                          <option key={c} value={c}>{countries[c].name}</option>
+                        {STATES.map((s) => (
+                          <option key={s}>{s}</option>
                         ))}
                       </select>
                     </Field>
+                    <Field label="Purpose of travel" error={errors.objective}>
+                      <select
+                        value={form.objective}
+                        onChange={set("objective")}
+                      >
+                        <option value="">Select…</option>
+                        {objectives.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.title}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Destination">
+                      <select
+                        value={form.country}
+                        onChange={set("country")}
+                        disabled={!objective}
+                      >
+                        <option value="">Not sure yet</option>
+                        {objective &&
+                          destinationsFor(objective.id).map((c) => (
+                            <option key={c} value={c}>
+                              {countries[c].name}
+                            </option>
+                          ))}
+                      </select>
+                    </Field>
                     <Field label="Help needed" error={errors.service}>
-                      <select value={form.service} onChange={set('service')}>
+                      <select value={form.service} onChange={set("service")}>
                         <option value="">Select…</option>
                         {SERVICE_GROUPS.map((g) => (
                           <optgroup key={g.title} label={g.title}>
-                            {g.services.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                            {g.services.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.title}
+                              </option>
+                            ))}
                           </optgroup>
                         ))}
                       </select>
                     </Field>
                     <Field label="When do you plan to travel?">
-                      <select value={form.timeline} onChange={set('timeline')}>
+                      <select value={form.timeline} onChange={set("timeline")}>
                         <option value="">Select…</option>
                         <option>Within 1 month</option>
                         <option>1–3 months</option>
@@ -258,7 +404,9 @@ export default function AssistPage() {
                   </div>
                   {extraFields.length > 0 && (
                     <fieldset className="extra-fields">
-                      <legend>{getService(form.service).title}: a few more details</legend>
+                      <legend>
+                        {getService(form.service).title}: a few more details
+                      </legend>
                       <div className="form-grid">
                         {extraFields.map((k) => {
                           const def = EXTRA_FIELDS[k];
@@ -267,10 +415,16 @@ export default function AssistPage() {
                               {def.options ? (
                                 <select value={form[k]} onChange={set(k)}>
                                   <option value="">Select…</option>
-                                  {def.options.map((o) => <option key={o}>{o}</option>)}
+                                  {def.options.map((o) => (
+                                    <option key={o}>{o}</option>
+                                  ))}
                                 </select>
                               ) : (
-                                <input value={form[k]} onChange={set(k)} placeholder={def.placeholder} />
+                                <input
+                                  value={form[k]}
+                                  onChange={set(k)}
+                                  placeholder={def.placeholder}
+                                />
                               )}
                             </Field>
                           );
@@ -279,29 +433,56 @@ export default function AssistPage() {
                     </fieldset>
                   )}
                   <Field label="Tell us about your situation">
-                    <textarea rows={5} value={form.message} onChange={set('message')} placeholder="e.g. I have a UK master's offer starting January, sponsored by my parents. I was refused once in 2024…" />
+                    <textarea
+                      rows={5}
+                      value={form.message}
+                      onChange={set("message")}
+                      placeholder="e.g. I have a UK master's offer starting January, sponsored by my parents. I was refused once in 2024…"
+                    />
                   </Field>
                   <div className="honeypot" aria-hidden="true">
                     <label>
                       Website
-                      <input tabIndex={-1} autoComplete="off" value={form.website} onChange={set('website')} />
+                      <input
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={form.website}
+                        onChange={set("website")}
+                      />
                     </label>
                   </div>
                   <div className="fee-note">
                     <span>Service fee</span>
                     <strong>{FEE}</strong>
-                    <small className="muted">Pay by debit card or bank transfer after you submit.</small>
+                    <small className="muted">
+                      Pay by debit card or bank transfer after you submit.
+                    </small>
                   </div>
                   <label className="consent">
-                    <input type="checkbox" checked={form.consent} onChange={set('consent')} />
-                    I agree that VisaSolutions may store my details to contact me about this request. I understand that the
-                    service fee is {FEE}, and that VisaSolutions provides guidance only and cannot guarantee any admission,
-                    job or visa decision.
+                    <input
+                      type="checkbox"
+                      checked={form.consent}
+                      onChange={set("consent")}
+                    />
+                    I agree that VisaSolutions may store my details to contact
+                    me about this request. I understand that the service fee is{" "}
+                    {FEE}, and that VisaSolutions provides guidance only and
+                    cannot guarantee any admission, job or visa decision.
                   </label>
-                  {errors.consent && <span className="error">{errors.consent}</span>}
-                  {sendError && <div className="alert alert-error" role="alert">{sendError}</div>}
-                  <button type="submit" className="btn btn-gold" disabled={sending}>
-                    {sending ? 'Sending…' : 'Submit request'}
+                  {errors.consent && (
+                    <span className="error">{errors.consent}</span>
+                  )}
+                  {sendError && (
+                    <div className="alert alert-error" role="alert">
+                      {sendError}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    className="btn btn-gold"
+                    disabled={sending}
+                  >
+                    {sending ? "Sending…" : "Submit request"}
                   </button>
                 </form>
               )}
@@ -316,18 +497,36 @@ export default function AssistPage() {
                       <li key={r.ref}>
                         <strong>{r.ref}</strong>
                         <span>{getService(r.service)?.title || r.service}</span>
-                        <span className="muted">{getObjective(r.objective)?.title}{r.country && ` · ${countries[r.country]?.name || r.country}`}</span>
-                        <small className="muted">{new Date(r.createdAt).toLocaleDateString('en-NG')} · {r.status === 'Received' ? 'Saved on this device only' : r.status}</small>
-                        {r.requestId && (
-                          r.paymentStatus === 'submitted' ? (
-                            <span className="pay-pill pay-awaiting">Payment sent · awaiting confirmation</span>
+                        <span className="muted">
+                          {getObjective(r.objective)?.title}
+                          {r.country &&
+                            ` · ${countries[r.country]?.name || r.country}`}
+                        </span>
+                        <small className="muted">
+                          {new Date(r.createdAt).toLocaleDateString("en-NG")} ·{" "}
+                          {r.status === "Received"
+                            ? "Saved on this device only"
+                            : r.status}
+                        </small>
+                        {r.requestId &&
+                          (r.paymentStatus === "submitted" ? (
+                            <span className="pay-pill pay-awaiting">
+                              Payment sent · awaiting confirmation
+                            </span>
                           ) : (
                             <span className="request-pay">
-                              <span className="pay-pill pay-unpaid">Unpaid · {FEE}</span>
-                              <button type="button" className="btn btn-sm btn-gold" onClick={() => openPayment(r)}>Pay now</button>
+                              <span className="pay-pill pay-unpaid">
+                                Unpaid · {FEE}
+                              </span>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-gold"
+                                onClick={() => openPayment(r)}
+                              >
+                                Pay now
+                              </button>
                             </span>
-                          )
-                        )}
+                          ))}
                       </li>
                     ))}
                   </ul>
@@ -344,12 +543,12 @@ export default function AssistPage() {
 
 // Start downloading Firebase once the visitor begins filling in the form (import() is cached).
 const preloadFirebase = () => {
-  import('../services/requests.js');
+  import("../services/requests.js");
 };
 
 function Field({ label, error, children }) {
   return (
-    <div className={`field ${error ? 'has-error' : ''}`}>
+    <div className={`field ${error ? "has-error" : ""}`}>
       <label>
         {label}
         {children}
