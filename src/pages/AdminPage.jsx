@@ -335,8 +335,8 @@ function PaymentsSection({ payments, reviewer }) {
       ) : (
         <>
           <p className="muted small">
-            Check your Paystack dashboard (card) or bank statement (transfer) before confirming. The client’s browser
-            report alone is not proof of payment.
+            Check the GTBank (Zillion Services) statement for the credit before confirming: match the amount, sender name
+            and narration. The client’s report alone is not proof of payment.
           </p>
           <ul className="payment-list">
             {payments.map((p) => (
@@ -372,23 +372,14 @@ function PaymentItem({ payment: p, reviewer }) {
       <div className="payment-item-head">
         <span className={`pay-pill ${status.cls}`}>{status.label}</span>
         <strong>{formatNaira(p.amount)}</strong>
-        <span>{p.method === 'card' ? '💳 Card (Paystack)' : '🏦 Bank transfer'}</span>
+        <span>🏦 Bank transfer</span>
         <span className="muted small">{formatDate(p.createdAt)}</span>
       </div>
       <dl className="admin-details">
-        {p.method === 'card' ? (
-          <div>
-            <dt>Paystack reference</dt>
-            <dd><code>{p.reference}</code></dd>
-          </div>
-        ) : (
-          <>
-            <div><dt>Sender name</dt><dd>{p.senderName}</dd></div>
-            <div><dt>Sender bank</dt><dd>{p.senderBank}</dd></div>
-            <div><dt>Date paid</dt><dd>{p.paidOn}</dd></div>
-            <div><dt>Expected narration</dt><dd><code>{p.requestRef}</code></dd></div>
-          </>
-        )}
+        <div><dt>Sender name</dt><dd>{p.senderName}</dd></div>
+        <div><dt>Sender bank</dt><dd>{p.senderBank}</dd></div>
+        <div><dt>Date paid</dt><dd>{p.paidOn}</dd></div>
+        <div><dt>Expected narration</dt><dd><code>{p.requestRef}</code></dd></div>
         {p.reviewedAt && (
           <div><dt>Reviewed</dt><dd>{formatDate(p.reviewedAt)}{p.reviewedBy && ` by ${p.reviewedBy}`}</dd></div>
         )}

@@ -65,26 +65,22 @@ service cloud.firestore {
     }
 
     function validNewPayment(d) {
-      return d.keys().hasOnly(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method', 'reference',
+      // Payment is by direct bank transfer only.
+      return d.keys().hasOnly(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method',
                                'senderName', 'senderBank', 'paidOn', 'status', 'createdAt'])
-        && d.keys().hasAll(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method', 'status', 'createdAt'])
+        && d.keys().hasAll(['requestId', 'requestRef', 'service', 'amount', 'currency', 'method',
+                            'senderName', 'senderBank', 'paidOn', 'status', 'createdAt'])
         && str(d.requestId, 1, 64)
         && str(d.requestRef, 4, 30)
         && str(d['service'], 1, 30)
         && d.amount == 15000
         && d.currency == 'NGN'
+        && d.method == 'transfer'
+        && str(d.senderName, 1, 120)
+        && str(d.senderBank, 1, 80)
+        && d.paidOn.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
         && d.status == 'awaiting-confirmation'
         && d.createdAt == request.time
-        && (
-          (d.method == 'card'
-            && str(d.get('reference', ''), 6, 100)
-            && !d.keys().hasAny(['senderName', 'senderBank', 'paidOn']))
-          || (d.method == 'transfer'
-            && str(d.get('senderName', ''), 1, 120)
-            && str(d.get('senderBank', ''), 1, 80)
-            && d.get('paidOn', '').matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-            && !d.keys().hasAny(['reference']))
-        )
         // The payment must point at a real request with the same reference and service.
         && exists(requestPath(d.requestId))
         && get(requestPath(d.requestId)).data.ref == d.requestRef

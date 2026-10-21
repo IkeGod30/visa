@@ -19,8 +19,6 @@ function recordPayment(request, fields) {
   });
 }
 
-export const recordCardPayment = (request, reference) => recordPayment(request, { method: 'card', reference });
-
 export const recordTransfer = (request, { senderName, senderBank, paidOn }) =>
   recordPayment(request, { method: 'transfer', senderName, senderBank, paidOn });
 

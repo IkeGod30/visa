@@ -116,7 +116,7 @@ export default function AssistPage() {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // The visitor has submitted card or transfer details; we still wait for an admin to confirm the money arrived.
+  // The visitor has submitted their transfer details; we still wait for an admin to confirm the money arrived.
   const markPaymentSubmitted = (ref, method) => {
     setRequests((prev) => {
       const next = prev.map((r) =>
@@ -226,8 +226,20 @@ export default function AssistPage() {
             From securing admission or a job offer to submitting your visa
             application, tell us what you need and an adviser will contact you
             about the next steps. Each service costs <strong>{FEE}</strong>,
-            payable by debit card or bank transfer.
+            payable by direct bank transfer.
+            {/* <br></br> */}
           </p>
+          <div className="important-note" role="note" aria-label="Important note about payment">
+            <span className="important-note-icon" aria-hidden="true">ⓘ</span>
+            <div>
+              <span className="important-note-label">Important</span>
+              <p>
+                The payment is <strong>exclusively for the guidance services</strong>.
+                Specifically, we guide you through the process; it is not the
+                cost of procuring any of the solutions you desire.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -455,7 +467,7 @@ export default function AssistPage() {
                     <span>Service fee</span>
                     <strong>{FEE}</strong>
                     <small className="muted">
-                      Pay by debit card or bank transfer after you submit.
+                      Pay by direct bank transfer after you submit.
                     </small>
                   </div>
                   <label className="consent">
