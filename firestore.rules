@@ -73,7 +73,7 @@ service cloud.firestore {
         && str(d.requestId, 1, 64)
         && str(d.requestRef, 4, 30)
         && str(d['service'], 1, 30)
-        && d.amount == 15000
+        && d.amount == 40000 // must equal SERVICE_FEE in src/data/payment.js
         && d.currency == 'NGN'
         && d.method == 'transfer'
         && str(d.senderName, 1, 120)

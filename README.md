@@ -43,7 +43,7 @@ Then submit a test request on `/assist` and sign in at `/admin` to see it.
 - Each request has a `status`: `new → contacted → in-progress → closed`.
 - `firebase.json` also configures local emulators (Firestore on 8080, Auth on 9099) for testing the rules.
 
-## Payments (₦15,000 per service)
+## Payments (₦40,000 per service)
 
 Payment is by **direct bank transfer only**. After a client submits a request, they see the account details below. They make the transfer, then fill in the "I've made the transfer" form (sender name, sending bank and date). They can also choose *Pay later* and use **Pay now** under "Your requests".
 
@@ -60,10 +60,10 @@ To change the account, edit `BANK_ACCOUNT` in [`src/data/payment.js`](src/data/p
 
 **Confirming payments (daily routine):**
 1. Open `/admin`. The banner shows how many payments are waiting. Click **Review now**.
-2. For each payment, find the credit on the Zillion Services GTBank statement. Match the amount (₦15,000), the sender name and the narration (the `VS-…` reference).
+2. For each payment, find the credit on the Zillion Services GTBank statement. Match the amount (₦40,000), the sender name and the narration (the `VS-…` reference).
 3. Click **Confirm paid**, or **Reject** with a note. The request then shows *Paid*, and you can start the work.
 
-Clients can only *submit* payment claims. They can never mark themselves as paid, change the amount, or read other people's payments; `firestore.rules` enforces this. The fee is fixed at ₦15,000 in both `src/data/payment.js` and `firestore.rules`. Change both together.
+Clients can only *submit* payment claims. They can never mark themselves as paid, change the amount, or read other people's payments; `firestore.rules` enforces this. The fee is fixed at ₦40,000 in both `src/data/payment.js` (`SERVICE_FEE`) and `firestore.rules` (`d.amount == 40000`). Change both together, then republish the rules.
 
 ## Before going live
 
