@@ -1,6 +1,6 @@
 // Fee and payment settings for the Get Assistance service.
 // SERVICE_FEE must match the amount enforced in firestore.rules.
-export const SERVICE_FEE = 15000;
+export const SERVICE_FEE = 40000;
 export const CURRENCY = 'NGN';
 
 const naira = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 });
